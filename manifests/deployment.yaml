@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redeployer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redeployer
+  template:
+    metadata:
+      labels:
+        app: redeployer
+    spec:
+      containers:
+      - image: ghcr.io/mmazurekgda/pod-secret-redeployer:main
+        tty: true
+        imagePullPolicy: Always
+        name: redeployer
+        command: ["python", "/code/app/main.py", "watch"]
