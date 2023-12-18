@@ -10,11 +10,11 @@ def validate_secret_label(
     label_name: str,
     label_value: str,
     redeployments: defaultdict,
-) -> bool:
+) -> dict:
     if isinstance(redeployments, dict):
         redeployments = defaultdict(dict, redeployments)
     if not label_name.startswith("redeployable"):
-        return False
+        return {}
     label_keys = label_name.split("-")
     if len(label_keys) != 3:
         raise ValueError(
@@ -48,4 +48,4 @@ def validate_secret_label(
                     "Skipping..."
                 )
         redeployments[label_number][label_key] = label_value
-    return True
+    return redeployments

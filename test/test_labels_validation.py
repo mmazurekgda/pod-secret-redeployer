@@ -1,4 +1,4 @@
-from core.validate import validate_secret_label
+from app.validate import validate_secret_label
 import pytest
 
 
@@ -6,13 +6,13 @@ import pytest
     "dictionary, labels, error, expected",
     [
         # all empty
-        ({}, {}, "", False),
+        ({}, {}, "", {}),
         # at least one valid label name
         (
             {},
             {"redeployable-1-namespace": "test-namespace"},
             "",
-            True,
+            {1: {"namespace": "test-namespace"}},
         ),
         # two valid label names
         (
@@ -22,49 +22,49 @@ import pytest
                 "redeployable-2-name": "test-name",
             },
             "",
-            True,
+            {1: {"namespace": "test-namespace"}, 2: {"name": "test-name"}},
         ),
         # add label to existing dictionary
         (
             {1: {"namespace": "test-namespace"}},
             {"redeployable-2-name": "test-name"},
             "",
-            True,
+            {1: {"namespace": "test-namespace"}, 2: {"name": "test-name"}},
         ),
         # does not start with redeployable
         (
             {},
             {"redeploy-1-namespace": "test-namespace"},
             "",
-            False,
+            {},
         ),
         # does not have 3 parts
         (
             {},
             {"redeployable-1": "test-namespace"},
             ".*Invalid redeployment label.*",
-            False,
+            {},
         ),
         # does not have integer as second part
         (
             {},
             {"redeployable-a-namespace": "test-namespace"},
             ".*Invalid number.*",
-            False,
+            {},
         ),
         # does not have valid key
         (
             {},
             {"redeployable-1-invalidkey": "test-namespace"},
             ".*Invalid redeployment key.*",
-            False,
+            {},
         ),
         # duplicate key
         (
             {1: {"namespace": "test-namespace"}},
             {"redeployable-1-namespace": "test-namespace"},
             ".*Duplicate redeployment key.*",
-            False,
+            {},
         ),
     ],
 )
@@ -74,6 +74,7 @@ def test_labels_validation(
     error,
     expected,
 ):
+    result = {}
     for label_name, label_value in labels.items():
 
         def validation():
@@ -87,4 +88,6 @@ def test_labels_validation(
             with pytest.raises(ValueError, match=error):
                 validation()
         else:
-            assert validation() == expected
+            result.update(validation())
+    if not error:
+        assert result == expected
