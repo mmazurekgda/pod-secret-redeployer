@@ -8,7 +8,7 @@ import click
 import pyfiglet as pf
 import datetime as datetime
 from logger import setup_logger
-from validate import validate_secret_label
+from validate import validate_secret_label, REDEPLOYMENT_KEYS
 
 CLIENT_SOCKET_TIMEOUT = None
 SERVER_SOCKET_TIMEOUT = None
@@ -59,7 +59,10 @@ def redeploy(
     }
     for deployment in redeployments.values():
         try:
-            v1.patch_namespaced_deployment(
+            call = (
+                f"patch_namespaced_{deployment['resource'].replace('-', '_')}"
+            )
+            getattr(v1, call)(
                 deployment["name"],
                 deployment["namespace"],
                 body,
@@ -102,10 +105,11 @@ def watch():
                     valid = False
                     break
             for deployment in redeployments.values():
-                if len(deployment.keys()) < 2:
+                min_keys_no = len(REDEPLOYMENT_KEYS)
+                if len(deployment.keys()) < min_keys_no:
                     logger.warning(
                         f"Redeployment label '{deployment}' not ready. "
-                        "Must have at least 2 keys. Skipping..."
+                        f"Must have at least {min_keys_no} keys. Skipping..."
                     )
                     valid = False
             if valid and redeployments:

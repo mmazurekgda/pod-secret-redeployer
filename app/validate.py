@@ -3,6 +3,12 @@ from collections import defaultdict
 REDEPLOYMENT_KEYS = [
     "namespace",
     "name",
+    "resource",
+]
+
+AVAILABLE_RESOURCES = [
+    "deployment",
+    "stateful-set",
 ]
 
 
@@ -19,7 +25,8 @@ def validate_secret_label(
     if len(label_keys) != 3:
         raise ValueError(
             f"Invalid redeployment label '{label_name}'. "
-            "Must be in the format 'redeployable-<number>-<name/namespace>'. "
+            "Must be in the format "
+            "'redeployable-<number>-<name/namespace/resource>'. "
             f"Skipping..."
         )
     else:
@@ -47,5 +54,11 @@ def validate_secret_label(
                     f"for redeployment label '{label_name}'. "
                     "Skipping..."
                 )
+        if label_key == "resource" and label_value not in AVAILABLE_RESOURCES:
+            raise ValueError(
+                f"Invalid resource '{label_value}'. "
+                f"Must be in {AVAILABLE_RESOURCES}. "
+                "Skipping..."
+            )
         redeployments[label_number][label_key] = label_value
     return redeployments

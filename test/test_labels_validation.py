@@ -14,15 +14,20 @@ import pytest
             "",
             {1: {"namespace": "test-namespace"}},
         ),
-        # two valid label names
+        # three valid label names
         (
             {},
             {
                 "redeployable-1-namespace": "test-namespace",
                 "redeployable-2-name": "test-name",
+                "redeployable-3-resource": "deployment",
             },
             "",
-            {1: {"namespace": "test-namespace"}, 2: {"name": "test-name"}},
+            {
+                1: {"namespace": "test-namespace"},
+                2: {"name": "test-name"},
+                3: {"resource": "deployment"},
+            },
         ),
         # add label to existing dictionary
         (
