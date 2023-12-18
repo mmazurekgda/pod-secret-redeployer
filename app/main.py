@@ -18,18 +18,25 @@ TRIGGERING_OPERATIONS = [
     "MODIFIED",
 ]
 
-config.load_kube_config()
-
 secrets_registry = []
 
 
 @click.group()
-@click.option("--verbosity", default="INFO", help="verbosity of the logger")
-def cli(verbosity):
+@click.option(
+    "--verbosity", default="INFO", help="verbosity of the logger", type=str
+)
+@click.option(
+    "--in_cluster", default=True, help="whether to run in cluster", type=bool
+)
+def cli(verbosity, in_cluster):
     setup_logger(
         verbosity,
         "REDEPLOYER",
     )
+    if in_cluster:
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
 
 
 def redeploy(
