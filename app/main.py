@@ -44,7 +44,6 @@ def redeploy(
 ):
     # inspired by
     # https://stackoverflow.com/questions/65996468/python-client-euqivelent-of-kubectl-rollout-restart-deployment
-    v1 = v1 = client.AppsV1Api()
     now = datetime.datetime.now(datetime.UTC)
     now = str(now.isoformat("T") + "Z")
     logger = logging.getLogger("REDEPLOYER")
@@ -62,7 +61,10 @@ def redeploy(
             call = (
                 f"patch_namespaced_{deployment['resource'].replace('-', '_')}"
             )
-            getattr(v1, call)(
+            vv = client.AppsV1Api()
+            if deployment["resource"] == "job":
+                vv = client.BatchV1Api()
+            getattr(vv, call)(
                 deployment["name"],
                 deployment["namespace"],
                 body,

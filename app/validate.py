@@ -9,6 +9,7 @@ REDEPLOYMENT_KEYS = [
 AVAILABLE_RESOURCES = [
     "deployment",
     "stateful-set",
+    "job",
 ]
 
 
