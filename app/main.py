@@ -61,15 +61,28 @@ def redeploy(
             call = (
                 f"patch_namespaced_{deployment['resource'].replace('-', '_')}"
             )
-            vv = client.AppsV1Api()
             if deployment["resource"] == "job":
+                # note: jobs in theory are not redeployable
+                # so we create a new one instead
                 vv = client.BatchV1Api()
-            getattr(vv, call)(
-                deployment["name"],
-                deployment["namespace"],
-                body,
-                pretty="true",
-            )
+                job = vv.read_namespaced_job(
+                    deployment["name"],
+                    deployment["namespace"],
+                )
+                job.metadata.name = f"{job.metadata.name}-{now}"
+                job.metadata.generate_name = f"{job.metadata.name}-{now}-"
+                vv.create_namespaced_job(
+                    deployment["namespace"],
+                    job,
+                )
+            else:
+                vv = client.AppsV1Api()
+                getattr(vv, call)(
+                    deployment["name"],
+                    deployment["namespace"],
+                    body,
+                    pretty="true",
+                )
         except client.rest.ApiException as e:
             logger.error("Did not succeed in redeploying! Details below:")
             logger.error(e)
