@@ -9,6 +9,8 @@ import pyfiglet as pf
 import datetime as datetime
 from logger import setup_logger
 from validate import validate_secret_label, REDEPLOYMENT_KEYS
+import string
+import random
 
 CLIENT_SOCKET_TIMEOUT = None
 SERVER_SOCKET_TIMEOUT = None
@@ -69,8 +71,13 @@ def redeploy(
                     deployment["name"],
                     deployment["namespace"],
                 )
-                job.metadata.name = f"{job.metadata.name}-{now}"
-                job.metadata.generate_name = f"{job.metadata.name}-{now}-"
+                random.seed(now)
+                letters = string.ascii_lowercase
+                uq_suffix = "".join(random.choice(letters) for i in range(10))
+                job.metadata.name = f"{job.metadata.name}-{uq_suffix}"
+                job.metadata.generate_name = (
+                    f"{job.metadata.name}-{uq_suffix}-"
+                )
                 vv.create_namespaced_job(
                     deployment["namespace"],
                     job,
