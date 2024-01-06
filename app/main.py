@@ -11,6 +11,7 @@ from logger import setup_logger
 from validate import validate_secret_label, REDEPLOYMENT_KEYS
 import string
 import random
+from ruamel.yaml import YAML
 
 CLIENT_SOCKET_TIMEOUT = None
 SERVER_SOCKET_TIMEOUT = None
@@ -75,6 +76,7 @@ def redeploy(
                 job_conf = job.metadata.annotations[
                     "kubectl.kubernetes.io/last-applied-configuration"
                 ]
+                job_conf = YAML().load(job_conf)
                 random.seed(now)
                 letters = string.ascii_lowercase
                 uq_suffix = "".join(random.choice(letters) for i in range(10))
