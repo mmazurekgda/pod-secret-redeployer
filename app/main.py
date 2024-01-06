@@ -71,16 +71,20 @@ def redeploy(
                     deployment["name"],
                     deployment["namespace"],
                 )
+                # this is experimental!
+                job_conf = job.metadata.annotations[
+                    "kubectl.kubernetes.io/last-applied-configuration"
+                ]
                 random.seed(now)
                 letters = string.ascii_lowercase
                 uq_suffix = "".join(random.choice(letters) for i in range(10))
-                job.metadata.name = f"{job.metadata.name}-{uq_suffix}"
-                job.metadata.generate_name = (
-                    f"{job.metadata.name}-{uq_suffix}-"
-                )
+                job_conf["metadata"]["name"] += f"-{uq_suffix}"
+                job_conf["metadata"][
+                    "generateName"
+                ] = f"{job_conf['metadata']['name']}-{uq_suffix}-"
                 vv.create_namespaced_job(
                     deployment["namespace"],
-                    job,
+                    job_conf,
                 )
             else:
                 vv = client.AppsV1Api()
